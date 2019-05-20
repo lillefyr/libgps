@@ -10,12 +10,23 @@ struct location {
 };
 typedef struct location loc_t;
 
+
+
+LAV EN UNION HERE
+
+
+
+
 // Initialize device
 extern void gps_init(void);
 // Activate device
 extern void gps_on(void);
 // Get the actual location
 extern void gps_location(loc_t *);
+// Get date and time
+extern void gps_get_datetime(int *year, int *month, int *day, int *hour, int *minute, int *second, int *hundredths, int *age);
+// get hdop
+extern int gps_hdop();
 
 
 // Turn off device (low-power consumption)

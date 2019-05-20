@@ -31,4 +31,4 @@ install:
 
 clean:
 	${RM} ${BUILD_DIR}/*
-
+	sudo ${RM} /usr/lib/libgps.a /usr/include/gps.h 

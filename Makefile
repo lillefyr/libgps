@@ -14,3 +14,5 @@ install:
 tests: all
 	$(MAKE) -C tests all
 
+clean:
+	$(MAKE) -C src clean

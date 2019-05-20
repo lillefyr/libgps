@@ -51,6 +51,36 @@ extern void gps_location(loc_t *coord) {
     }
 }
 
+// Get date and time
+extern void gps_get_datetime(int *year, int *month, int *day, int *hour, int *minute, int *second, int *hundredths, int *age) {
+    gpzda_t gpzda;
+    char buffer[256];
+
+    serial_readln(buffer, 256);
+    nmea_parse_gpzda(buffer, &gpzda);
+
+    hour = gpzda.hour;
+    minute = gpzda.minute;
+    second = gpzda.second;
+    hundredths = gpzda.hundredths;
+    day = gpzda.day;
+    month = gpzda.month;
+    year = gpzda.year;
+    //gpzda.local_zone_hours; // -13 .. 13
+    //gpzda.local_zone_minutes; // 0 .. 59
+    age = 0;
+}
+
+// get hdop
+extern int gps_hdop();
+    gpgsa_t gpgsa;
+    char buffer[256];
+
+    serial_readln(buffer, 256);
+    nmea_parse_gpgga(buffer, &gpgsa);
+    return gpgsa.hdop;
+}
+
 extern void gps_off(void) {
     //Write off
     serial_close();

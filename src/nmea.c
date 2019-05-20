@@ -102,6 +102,50 @@ void nmea_parse_gprmc(char *nmea, gprmc_t *loc)
     loc->course = atof(p);
 }
 
+void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
+{
+    char *p = nmea;
+
+    loc->hdop = 100;
+}
+
+
+void nmea_parse_gpzda(char *nmea, gpzda_t *loc)
+{
+    char *p = nmea;
+    char p2[2];
+
+    p = strchr(p, ',')+1;
+
+    p2[0] = p[0];
+    p2[1] = p[1];
+    loc->hour = (uint8_t)atoi(p2);
+
+    p2[0] = p[2];
+    p2[1] = p[3];
+    loc->minute = (uint8_t)atoi(p2);
+
+    p2[0] = p[4];
+    p2[1] = p[5];
+    loc->second = (uint8_t)atoi(p2);
+
+    p2[0] = p[6];
+    p2[1] = p[7];
+    loc->hundredths = (uint8_t)atoi(p2);
+
+    p = strchr(p, ',')+1;
+    loc->day = (uint8_t)atoi(p);
+    p = strchr(p, ',')+1;
+    loc->month = (uint8_t)atoi(p);
+    p = strchr(p, ',')+1;
+    loc->year = (uint8_t)atoi(p);
+    p = strchr(p, ',')+1;
+    loc->local_zone_hours = (uint8_t)atoi(p);
+    p = strchr(p, ',')+1;
+    loc->local_zone_minutes = (uint8_t)atoi(p);
+}
+
+
 /**
  * Get the message type (GPGGA, GPRMC, etc..)
  *
@@ -123,6 +167,14 @@ uint8_t nmea_get_message_type(const char *message)
 
     if (strstr(message, NMEA_GPRMC_STR) != NULL) {
         return NMEA_GPRMC;
+    }
+
+    if (strstr(message, NMEA_GPGSA_STR) != NULL) {
+        return NMEA_GPGSA;
+    }
+
+    if (strstr(message, NMEA_GPZDA_STR) != NULL) {
+        return NMEA_GPZDA;
     }
 
     return NMEA_UNKNOWN;

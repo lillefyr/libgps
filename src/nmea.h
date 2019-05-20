@@ -10,6 +10,10 @@
 #define NMEA_GPRMC_STR "$GPRMC"
 #define NMEA_GPGGA 0x02
 #define NMEA_GPGGA_STR "$GPGGA"
+#define NMEA_GPGSA 0x03
+#define NMEA_GPGSA_STR "$GPGSA"
+#define NMEA_GPZDA 0x04
+#define NMEA_GPZDA_STR "$GPZDA"
 #define NMEA_UNKNOWN 0x00
 #define _COMPLETED 0x03
 
@@ -44,10 +48,47 @@ struct gprmc {
 };
 typedef struct gprmc gprmc_t;
 
+struct gpgsa {
+    char a;
+    char b;
+    char c;
+    char d;
+    char e;
+    char f;
+    char g;
+    char h;
+    char i;
+    char j;
+    char k;
+    char l;
+    char m;
+    char n;
+    char o;
+    uint8_t hdop;
+    char checksum;
+};
+typedef struct gpgsa gpgsa_t;
+
+
+struct gpzda {
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t hundredths;
+    uint8_t day;
+    uint8_t month;
+    uint8_t year;
+    uint8_t local_zone_hours; // -13 .. 13
+    uint8_t local_zone_minutes; // 0 .. 59
+};
+typedef struct gpzda gpzda_t;
+
 uint8_t nmea_get_message_type(const char *);
 uint8_t nmea_valid_checksum(const char *);
 void nmea_parse_gpgga(char *, gpgga_t *);
 void nmea_parse_gprmc(char *, gprmc_t *);
+void nmea_parse_gpgsa(char *, gpgsa_t *);
+void nmea_parse_gpzda(char *, gpzda_t *);
 
 #endif
 
