@@ -106,7 +106,7 @@ void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 {
     char *p = nmea;
 
-    loc->hdop = 100;
+    loc->HDOP = 100;
 }
 
 

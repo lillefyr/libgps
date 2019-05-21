@@ -48,28 +48,6 @@ struct gprmc {
 };
 typedef struct gprmc gprmc_t;
 
-struct gpgsa {
-    char a;
-    char b;
-    char c;
-    char d;
-    char e;
-    char f;
-    char g;
-    char h;
-    char i;
-    char j;
-    char k;
-    char l;
-    char m;
-    char n;
-    char o;
-    uint8_t hdop;
-    char checksum;
-};
-typedef struct gpgsa gpgsa_t;
-
-
 struct gpzda {
     uint8_t hour;
     uint8_t minute;
@@ -82,6 +60,28 @@ struct gpzda {
     uint8_t local_zone_minutes; // 0 .. 59
 };
 typedef struct gpzda gpzda_t;
+
+struct gpgsa {
+     uint8_t Satellitestatus;
+     uint8_t Autoselection;
+     uint8_t Dfix;
+     uint8_t RPN01;
+     uint8_t RPN02;
+     uint8_t RPN03;
+     uint8_t RPN04;
+     uint8_t RPN05;
+     uint8_t RPN06;
+     uint8_t RPN07;
+     uint8_t RPN08;
+     uint8_t RPN09;
+     uint8_t RPN10;
+     uint8_t RPN11;
+     uint8_t RPN12;
+     double PDOP;
+     double HDOP;
+     double VDOP;
+};
+typedef struct gpgsa gpgsa_t;
 
 uint8_t nmea_get_message_type(const char *);
 uint8_t nmea_valid_checksum(const char *);

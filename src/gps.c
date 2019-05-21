@@ -18,12 +18,13 @@ extern void gps_on(void) {
     //Write on
 }
 
-// Compute the GPS location using decimal scale
-extern void gps_location(loc_t *coord) {
+void gps_data(int datarequested, common_t *common) {
     uint8_t status = _EMPTY;
     while(status != _COMPLETED) {
         gpgga_t gpgga;
         gprmc_t gprmc;
+        gpgsa_t gpgsa;
+        gpzda_t gpzda;
         char buffer[256];
 
         serial_readln(buffer, 256);
@@ -33,52 +34,58 @@ extern void gps_location(loc_t *coord) {
 
                 gps_convert_deg_to_dec(&(gpgga.latitude), gpgga.lat, &(gpgga.longitude), gpgga.lon);
 
-                coord->latitude = gpgga.latitude;
-                coord->longitude = gpgga.longitude;
-                coord->altitude = gpgga.altitude;
+                common->location.latitude = gpgga.latitude;
+                common->location.longitude = gpgga.longitude;
+                common->location.altitude = gpgga.altitude;
 
-                status |= NMEA_GPGGA;
+                if ( datarequested == NMEA_GPGGA ) { status |= NMEA_GPGGA; }
                 break;
             case NMEA_GPRMC:
                 nmea_parse_gprmc(buffer, &gprmc);
 
-                coord->speed = gprmc.speed;
-                coord->course = gprmc.course;
+                common->location.speed = gprmc.speed;
+                common->location.course = gprmc.course;
 
-                status |= NMEA_GPRMC;
+                if ( datarequested == NMEA_GPRMC ) { status |= NMEA_GPRMC; }
+                break;
+
+            case NMEA_GPGSA:
+                nmea_parse_gpgsa(buffer, &gpgsa);
+                if ( datarequested == NMEA_GPGSA ) { status |= NMEA_GPGSA; }
+                break;
+
+            case NMEA_GPZDA:
+                nmea_parse_gpzda(buffer, &gpzda);
+
+                common->gpsdatetime.hour = gpzda.hour;
+                common->gpsdatetime.minute = gpzda.minute;
+                common->gpsdatetime.second = gpzda.second;
+                common->gpsdatetime.hundredths = gpzda.hundredths;
+                common->gpsdatetime.day = gpzda.day;
+                common->gpsdatetime.month = gpzda.month;
+                common->gpsdatetime.year = gpzda.year;
+                common->gpsdatetime.local_zone_hours = gpzda.local_zone_hours; // -13 .. 13
+                common->gpsdatetime.local_zone_minutes = gpzda.local_zone_minutes; // 0 .. 59
+                common->gpsdatetime.age = 0;
+                if ( datarequested == NMEA_GPZDA ) { status |= NMEA_GPZDA; }
                 break;
         }
     }
 }
 
-// Get date and time
-extern void gps_get_datetime(int *year, int *month, int *day, int *hour, int *minute, int *second, int *hundredths, int *age) {
-    gpzda_t gpzda;
-    char buffer[256];
+// Compute the GPS location using decimal scale
+extern void gps_location(loc_t *coord) {
+    gps_data(NMEA_GPGGA, coord);
+    gps_data(NMEA_GPRMC, coord);
+}
 
-    serial_readln(buffer, 256);
-    nmea_parse_gpzda(buffer, &gpzda);
-
-    hour = gpzda.hour;
-    minute = gpzda.minute;
-    second = gpzda.second;
-    hundredths = gpzda.hundredths;
-    day = gpzda.day;
-    month = gpzda.month;
-    year = gpzda.year;
-    //gpzda.local_zone_hours; // -13 .. 13
-    //gpzda.local_zone_minutes; // 0 .. 59
-    age = 0;
+extern void gps_get_datetime(datetime_t *datetime) {
+    gps_data(NMEA_GPZDA, datetime);
 }
 
 // get hdop
-extern int gps_hdop();
-    gpgsa_t gpgsa;
-    char buffer[256];
-
-    serial_readln(buffer, 256);
-    nmea_parse_gpgga(buffer, &gpgsa);
-    return gpgsa.hdop;
+extern void gps_hdop(satellitedata_t *sat) {
+    gps_data(NMEA_GPGSA, sat);
 }
 
 extern void gps_off(void) {
