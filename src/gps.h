@@ -59,11 +59,11 @@ extern void gps_init(void);
 // Activate device
 extern void gps_on(void);
 // Get the actual location
-extern void gps_location(loc_t *);
+extern void gps_location(common_t *);
 // Get date and time
-extern void gps_get_datetime(datetime_t *);
+extern void gps_get_datetime(common_t *);
 // get hdop
-extern void gps_gpgsa(satellitedata_t *);
+extern void gps_gpgsa(common_t *);
 
 
 // Turn off device (low-power consumption)

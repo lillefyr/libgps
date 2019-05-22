@@ -74,17 +74,17 @@ void gps_data(int datarequested, common_t *common) {
 }
 
 // Compute the GPS location using decimal scale
-extern void gps_location(loc_t *coord) {
+extern void gps_location(common_t *coord) {
     gps_data(NMEA_GPGGA, coord);
     gps_data(NMEA_GPRMC, coord);
 }
 
-extern void gps_get_datetime(datetime_t *datetime) {
+extern void gps_get_datetime(common_t *datetime) {
     gps_data(NMEA_GPZDA, datetime);
 }
 
 // get hdop
-extern void gps_hdop(satellitedata_t *sat) {
+extern void gps_hdop(common_t *sat) {
     gps_data(NMEA_GPGSA, sat);
 }
 

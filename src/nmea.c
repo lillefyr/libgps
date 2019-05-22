@@ -105,8 +105,59 @@ void nmea_parse_gprmc(char *nmea, gprmc_t *loc)
 void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 {
     char *p = nmea;
+	p = strchr(p, ',')+1;
+    loc->Satellitestatus = (uint8_t)atoi(p);
 
-    loc->HDOP = 100;
+    p = strchr(p, ',')+1;
+    loc->Autoselection = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->Dfix = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN01 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN02 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN03 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN04 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN05 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN06 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN07 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN08 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN09 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN10 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN11 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->RPN12 = (uint8_t)atoi(p);
+
+    p = strchr(p, ',')+1;
+    loc->PDOP = atof(p);
+
+    p = strchr(p, ',')+1;
+    loc->HDOP = atof(p);
+
+    p = strchr(p, ',')+1;
+    loc->VDOP = atof(p);
 }
 
 
