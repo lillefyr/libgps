@@ -10,12 +10,11 @@
 #define NMEA_GPRMC_STR "$GPRMC"
 #define NMEA_GPGGA 0x02
 #define NMEA_GPGGA_STR "$GPGGA"
-#define NMEA_GPGSA 0x03
+#define NMEA_GPGSA 0x04
 #define NMEA_GPGSA_STR "$GPGSA"
-#define NMEA_GPZDA 0x04
+#define NMEA_GPZDA 0x08
 #define NMEA_GPZDA_STR "$GPZDA"
 #define NMEA_UNKNOWN 0x00
-#define _COMPLETED 0x03
 
 #define NMEA_CHECKSUM_ERR 0x80
 #define NMEA_MESSAGE_ERR 0xC0

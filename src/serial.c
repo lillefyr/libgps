@@ -50,17 +50,24 @@ void serial_println(const char *line, int len)
 
 // Read a line from UART.
 // Return a 0 len string in case of problems with UART
+// or buffer is full
 void serial_readln(char *buffer, int len)
 {
+    int cnt=0;
     char c;
     char *b = buffer;
     int rx_length = -1;
     while(1) {
         rx_length = read(uart0_filestream, (void*)(&c), 1);
 
+        len--; // how much space left in buffer
+        if (len == 0) { fprintf(stdout,"buffer overflow\n"); *b = '\0'; break; } 
         if (rx_length <= 0) {
             //wait for messages
             sleep(1);
+            cnt++;
+            // waited for more than 5 seconds, have a break
+            if ( cnt > 5 ) { fprintf(stdout,"timeout\n"); *b = '\0'; break; } 
         } else {
             if (c == '\n') {
                 *b++ = '\0';

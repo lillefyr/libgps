@@ -105,13 +105,15 @@ void nmea_parse_gprmc(char *nmea, gprmc_t *loc)
 void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 {
     char *p = nmea;
-	p = strchr(p, ',')+1;
-    loc->Satellitestatus = (uint8_t)atoi(p);
+
+    // skip Satellite status GSA tag
+    p = strchr(p, ',')+1;
 
     p = strchr(p, ',')+1;
-    loc->Autoselection = (uint8_t)atoi(p);
+    loc->Autoselection = p[0];
 
     p = strchr(p, ',')+1;
+
     loc->Dfix = (uint8_t)atoi(p);
 
     p = strchr(p, ',')+1;
@@ -158,19 +160,26 @@ void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 
     p = strchr(p, ',')+1;
     loc->VDOP = atof(p);
+
+    fprintf(stdout, "=======GPGSA======= next field\n");
+    fprintf(stdout, p); fprintf(stdout,"\n");
+    fprintf(stdout, "=======GPGSA=======\n");
 }
 
 
 void nmea_parse_gpzda(char *nmea, gpzda_t *loc)
 {
     char *p = nmea;
+    fprintf(stdout, p); fprintf(stdout,"\n");
     char p2[2];
 
     p = strchr(p, ',')+1;
+    fprintf(stdout, p); fprintf(stdout,"\n");
 
     p2[0] = p[0];
     p2[1] = p[1];
     loc->hour = (uint8_t)atoi(p2);
+    fprintf(stdout, p2); fprintf(stdout,"\n");
 
     p2[0] = p[2];
     p2[1] = p[3];

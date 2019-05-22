@@ -1,9 +1,13 @@
 #ifndef _GPS_H_
 #define _GPS_H_
 
+#include <nmea.h>
+
 struct location {
     double latitude;
+    char   lat;
     double longitude;
+    char   lon;
     double speed;
     double altitude;
     double course;
@@ -47,23 +51,31 @@ struct satellitedata {
 };
 typedef struct satellitedata satellitedata_t;
 
-union common_u {
-    loc_t location;
-    datetime_t gpsdatetime;
-    satellitedata_t satellitedata;
+struct common {
+    gpgga_t gpgga;
+    gprmc_t gprmc;
+    gpzda_t gpzda;
+    gpgsa_t gpgsa;
 };
-typedef union common_u common_t;
+typedef struct common common_t;
+
+//    loc_t location;
+//    datetime_t gpsdatetime;
+//    satellitedata_t satellitedata;
 
 // Initialize device
 extern void gps_init(void);
 // Activate device
 extern void gps_on(void);
+// get actual values
+extern void gps_data(void);
+
 // Get the actual location
-extern void gps_location(common_t *);
+extern void gps_location(loc_t *);
 // Get date and time
-extern void gps_get_datetime(common_t *);
+extern void gps_datetime(datetime_t *);
 // get hdop
-extern void gps_gpgsa(common_t *);
+extern void gps_gpgsa(satellitedata_t *);
 
 
 // Turn off device (low-power consumption)
