@@ -26,10 +26,10 @@ init:
 	${MKDIR} -p ${BUILD_DIR}
 
 install:
-	rm -f /usr/lib/libgps.a /usr/include/gps.h /usr/include/nmea.h
-	ln -s `pwd`/${BUILD_DIR}/libgps.a /usr/lib/libgps.a
-	ln -s `pwd`/${BUILD_DIR}/gps.h /usr/include/gps.h
-	ln -s `pwd`/${BUILD_DIR}/nmea.h /usr/include/nmea.h
+	sudo ${RM} -f /usr/lib/libgps.a /usr/include/gps.h /usr/include/nmea.h
+	sudo ln -s `pwd`/${BUILD_DIR}/libgps.a /usr/lib/libgps.a
+	sudo ln -s `pwd`/${BUILD_DIR}/gps.h /usr/include/gps.h
+	sudo ln -s `pwd`/${BUILD_DIR}/nmea.h /usr/include/nmea.h
 
 clean:
 	${RM} ${BUILD_DIR}/*

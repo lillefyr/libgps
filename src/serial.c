@@ -60,8 +60,8 @@ void serial_readln(char *buffer, int len)
     while(1) {
         rx_length = read(uart0_filestream, (void*)(&c), 1);
 
-        len--; // how much space left in buffer
-        if (len == 0) { fprintf(stdout,"buffer overflow\n"); *b = '\0'; break; } 
+        len--; // how much space left in buffer, drop the whole buffer
+        if (len == 0) { b = buffer; fprintf(stdout,"buffer overflow\n"); *b = '\0'; break; } 
         if (rx_length <= 0) {
             //wait for messages
             sleep(1);

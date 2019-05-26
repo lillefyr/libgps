@@ -14,7 +14,6 @@ struct location {
 };
 typedef struct location loc_t;
 
-
 struct gpsdatetime {
     int year;
     int month;
@@ -51,17 +50,19 @@ struct satellitedata {
 };
 typedef struct satellitedata satellitedata_t;
 
+
 struct common {
     gpgga_t gpgga;
     gprmc_t gprmc;
     gpzda_t gpzda;
     gpgsa_t gpgsa;
+    gpvtg_t gpvtg;
+    gpgsv_t gpgsv;
+    gpgll_t gpgll;
+    gptxt_t gptxt;
+
 };
 typedef struct common common_t;
-
-//    loc_t location;
-//    datetime_t gpsdatetime;
-//    satellitedata_t satellitedata;
 
 // Initialize device
 extern void gps_init(void);
@@ -71,11 +72,11 @@ extern void gps_on(void);
 extern void gps_data(void);
 
 // Get the actual location
-extern void gps_location(loc_t *);
+extern char gps_location(loc_t *);
 // Get date and time
-extern void gps_datetime(datetime_t *);
+extern char gps_datetime(datetime_t *);
 // get hdop
-extern void gps_gpgsa(satellitedata_t *);
+extern char gps_gpgsa(satellitedata_t *);
 
 
 // Turn off device (low-power consumption)

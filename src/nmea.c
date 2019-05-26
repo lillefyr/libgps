@@ -9,6 +9,7 @@
 void nmea_parse_gpgga(char *nmea, gpgga_t *loc)
 {
     char *p = nmea;
+    //fprintf(stdout,"GPGGA\n");
 
     p = strchr(p, ',')+1; //skip time
 
@@ -54,11 +55,13 @@ void nmea_parse_gpgga(char *nmea, gpgga_t *loc)
 
     p = strchr(p, ',')+1;
     loc->altitude = atof(p);
+    loc->valueSet = 'Y';
 }
 
 void nmea_parse_gprmc(char *nmea, gprmc_t *loc)
 {
     char *p = nmea;
+    //fprintf(stdout,"GPRMC\n");
 
     p = strchr(p, ',')+1; //skip time
     p = strchr(p, ',')+1; //skip status
@@ -100,11 +103,17 @@ void nmea_parse_gprmc(char *nmea, gprmc_t *loc)
 
     p = strchr(p, ',')+1;
     loc->course = atof(p);
+    loc->valueSet = 'Y';
 }
 
 void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 {
-    char *p = nmea;
+    //fprintf(stdout,"GPGSA\n");
+    char *p;
+    // change * to , to avoid problems with *checksum
+    p = strchr(nmea, '*');
+    *p = ',';
+    p = nmea;
 
     // skip Satellite status GSA tag
     p = strchr(p, ',')+1;
@@ -113,7 +122,6 @@ void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
     loc->Autoselection = p[0];
 
     p = strchr(p, ',')+1;
-
     loc->Dfix = (uint8_t)atoi(p);
 
     p = strchr(p, ',')+1;
@@ -160,15 +168,13 @@ void nmea_parse_gpgsa(char *nmea, gpgsa_t *loc)
 
     p = strchr(p, ',')+1;
     loc->VDOP = atof(p);
-
-    fprintf(stdout, "=======GPGSA======= next field\n");
-    fprintf(stdout, p); fprintf(stdout,"\n");
-    fprintf(stdout, "=======GPGSA=======\n");
+    loc->valueSet = 'Y';
 }
 
 
 void nmea_parse_gpzda(char *nmea, gpzda_t *loc)
 {
+    //fprintf(stdout,"GPZDA\n");
     char *p = nmea;
     fprintf(stdout, p); fprintf(stdout,"\n");
     char p2[2];
@@ -203,8 +209,52 @@ void nmea_parse_gpzda(char *nmea, gpzda_t *loc)
     loc->local_zone_hours = (uint8_t)atoi(p);
     p = strchr(p, ',')+1;
     loc->local_zone_minutes = (uint8_t)atoi(p);
+    loc->valueSet = 'Y';
 }
 
+void nmea_parse_gpvtg(char *nmea, gpvtg_t *loc)
+{
+    //fprintf(stdout,"GPVTG\n");
+    char *p = nmea;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+
+    p = strchr(p, ',')+1;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+    loc->valueSet = 'Y';
+}
+
+void nmea_parse_gpgsv(char *nmea, gpgsv_t *loc)
+{
+    //fprintf(stdout,"GPGSV\n");
+    char *p = nmea;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+
+    p = strchr(p, ',')+1;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+    loc->valueSet = 'Y';
+}
+
+void nmea_parse_gpgll(char *nmea, gpgll_t *loc)
+{
+    //fprintf(stdout,"GPGLL\n");
+    char *p = nmea;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+
+    p = strchr(p, ',')+1;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+    loc->valueSet = 'Y';
+}
+
+void nmea_parse_gptxt(char *nmea, gptxt_t *loc)
+{
+    //fprintf(stdout,"GPTXT\n");
+    char *p = nmea;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+
+    p = strchr(p, ',')+1;
+    //fprintf(stdout, p); fprintf(stdout,"\n");
+    loc->valueSet = 'Y';
+}
 
 /**
  * Get the message type (GPGGA, GPRMC, etc..)
@@ -217,6 +267,9 @@ void nmea_parse_gpzda(char *nmea, gpzda_t *loc)
 uint8_t nmea_get_message_type(const char *message)
 {
     uint8_t checksum = 0;
+
+    if (strchr(message, '*') == NULL) { return NMEA_UNKNOWN; }
+
     if ((checksum = nmea_valid_checksum(message)) != _EMPTY) {
         return checksum;
     }
@@ -235,6 +288,22 @@ uint8_t nmea_get_message_type(const char *message)
 
     if (strstr(message, NMEA_GPZDA_STR) != NULL) {
         return NMEA_GPZDA;
+    }
+
+    if (strstr(message, NMEA_GPVTG_STR) != NULL) {
+        return NMEA_GPVTG;
+    }
+
+    if (strstr(message, NMEA_GPGSV_STR) != NULL) {
+        return NMEA_GPGSV;
+    }
+
+    if (strstr(message, NMEA_GPGLL_STR) != NULL) {
+        return NMEA_GPGLL;
+    }
+
+    if (strstr(message, NMEA_GPTXT_STR) != NULL) {
+        return NMEA_GPTXT;
     }
 
     return NMEA_UNKNOWN;

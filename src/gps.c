@@ -7,6 +7,16 @@
 #include "nmea.h"
 #include "serial.h"
 
+#define __USE_XOPEN
+#include <time.h>
+//#include <sys/time.h>
+
+struct tm mytime;
+
+// all GPS data
+common_t common;
+char buffer[256];
+
 extern void gps_init(void) {
     serial_init();
     serial_config();
@@ -18,62 +28,102 @@ extern void gps_on(void) {
     //Write on
 }
 
-// all GPS data
-common_t common;
+void get_system_time(void) {
+    char buff[15];
+    time_t now = time(NULL);
+    struct tm tmbuf;
+    strftime(buff, 15, "%y%m%d%H%M%S", localtime(&now));
+    strptime(buff, "%y%m%d%H%M%S", &tmbuf);
+
+    //fprintf(stdout,"%s\n", buff);
+    common.gpzda.year = tmbuf.tm_year - 100;
+    common.gpzda.month = tmbuf.tm_mon;
+    common.gpzda.day = tmbuf.tm_mday;
+    common.gpzda.hour = tmbuf.tm_hour;
+    common.gpzda.minute = tmbuf.tm_min;
+    common.gpzda.second = tmbuf.tm_sec;
+    common.gpzda.hundredths = 0;
+    common.gpzda.local_zone_hours = 0;
+    common.gpzda.local_zone_minutes = 0;
+    common.gpzda.valueSet = 'Y';
+
+    //fprintf(stdout, "get_system_time %d:%d\n", common.gpzda.hour, common.gpzda.minute);
+}
 
 extern void gps_data(void) {
     int cnt = 20;
     int NMEA_Status = 0;
-    char buffer[256];
+    get_system_time();
 
-    char buffer2[16]; // unused, debugging bufferoverflow, seems to save the code
-    for ( int cnt2=1; cnt2<15; cnt2++ ) { buffer2[cnt2] = 'X'; }
-    buffer2[15]= 0;
-    buffer2[0]='Y';
-
-    while ((cnt > 0) && ( NMEA_Status != ( NMEA_GPGGA && NMEA_GPRMC && NMEA_GPGSA && NMEA_GPZDA ))) {
+    while ((cnt > 0) && ( NMEA_Status == 0 )) {
         
         //fprintf(stdout, "start read\n"); fflush(stdout);
-        serial_readln(buffer, 254);
-        //fprintf(stdout, "end read\n"); fflush(stdout);
+        for ( int cnt2=1; cnt2<254; cnt2++ ) { buffer[cnt2] = 0; }
+        
+        serial_readln(buffer, 255);
+        //fprintf(stdout, "end read %d\n", sizeof(buffer)); fflush(stdout);
 
         // extract the buffers we find
         switch (nmea_get_message_type(buffer)) {
             case NMEA_GPGGA:
-                fprintf(stdout, "GPGGA\n"); fflush(stdout);
+                //fprintf(stdout, "GPGGA\n"); fflush(stdout);
                 nmea_parse_gpgga(buffer, &common.gpgga);
                 gps_convert_deg_to_dec(&(common.gpgga.latitude), common.gpgga.lat, &(common.gpgga.longitude), common.gpgga.lon);
-                fprintf(stdout, "GPGGA\n"); fflush(stdout);
+                //fprintf(stdout, "GPGGA\n"); fflush(stdout);
                 NMEA_Status |= NMEA_GPGGA; // set the bit
                 break;
 
             case NMEA_GPRMC:
-                fprintf(stdout, "GPRMC\n"); fflush(stdout);
+                //fprintf(stdout, "GPRMC\n"); fflush(stdout);
                 nmea_parse_gprmc(buffer, &common.gprmc);
-                fprintf(stdout, "GPRMC\n"); fflush(stdout);
+                //fprintf(stdout, "GPRMC\n"); fflush(stdout);
                 NMEA_Status |= NMEA_GPRMC; // set the bit
                 break;
 
             case NMEA_GPGSA:
-                fprintf(stdout, "GPGSA\n"); fflush(stdout);
+                //fprintf(stdout, "GPGSA\n"); fflush(stdout);
                 nmea_parse_gpgsa(buffer, &common.gpgsa);
-                fprintf(stdout, "GPGSA\n"); fflush(stdout);
+                //fprintf(stdout, "GPGSA\n"); fflush(stdout);
                 NMEA_Status |= NMEA_GPGSA; // set the bit
                 break;
 
             case NMEA_GPZDA:
                 fprintf(stdout, "GPZDA\n"); fflush(stdout);
                 nmea_parse_gpzda(buffer, &common.gpzda);
-                fprintf(stdout, "GPZDA\n"); fflush(stdout);
+                //fprintf(stdout, "GPZDA\n"); fflush(stdout);
                 NMEA_Status |= NMEA_GPZDA; // set the bit
                 break;
+
+            case NMEA_GPGSV:
+                //fprintf(stdout, "GPGSV\n"); fflush(stdout);
+                nmea_parse_gpgsv(buffer, &common.gpgsv);
+                NMEA_Status |= NMEA_GPGSV; // set the bit
+                break;
+
+            case NMEA_GPGLL:
+                //fprintf(stdout, "GPGLL\n"); fflush(stdout);
+                nmea_parse_gpgll(buffer, &common.gpgll);
+                NMEA_Status |= NMEA_GPGLL; // set the bit
+                break;
+
+            case NMEA_GPTXT:
+                //fprintf(stdout, "GPTXT\n"); fflush(stdout);
+                nmea_parse_gptxt(buffer, &common.gptxt);
+                NMEA_Status |= NMEA_GPTXT; // set the bit
+                break;
+
+            case NMEA_GPVTG:
+                //fprintf(stdout, "GPVTG\n"); fflush(stdout);
+                nmea_parse_gpvtg(buffer, &common.gpvtg);
+                NMEA_Status |= NMEA_GPVTG; // set the bit
+                break;
+
             default:
-                //fprintf(stdout, "NOTHING found\n"); fflush(stdout);
+                fprintf(stdout, "\nunknown message ");
+                fprintf(stdout, buffer); fflush(stdout);
                 break;
         }
         cnt--;
-//        fprintf(stdout, "remaining %d\n", cnt); fflush(stdout);
-//        fprintf(stdout, "buffer2=%s", buffer2); fflush(stdout);
     }
 }
 
@@ -107,7 +157,7 @@ double gps_deg_dec(double deg_point)
 }
 
 // Compute the GPS location using decimal scale
-extern void gps_location(loc_t *coord) {
+extern char gps_location(loc_t *coord) {
     coord->latitude = common.gpgga.latitude;
     coord->lat = common.gpgga.lat;
     coord->longitude = common.gpgga.lon;
@@ -115,9 +165,10 @@ extern void gps_location(loc_t *coord) {
     coord->altitude = common.gpgga.altitude;
     coord->speed = common.gprmc.speed;
     coord->course = common.gprmc.course;
+    return ( common.gprmc.valueSet );
 }
 
-extern void gps_datetime(datetime_t *datetime) {
+extern char gps_datetime(datetime_t *datetime) {
 
     datetime->year = common.gpzda.year;
     datetime->month = common.gpzda.month;
@@ -129,10 +180,13 @@ extern void gps_datetime(datetime_t *datetime) {
     datetime->local_zone_hours = common.gpzda.local_zone_hours;
     datetime->local_zone_minutes = common.gpzda.local_zone_minutes;
     datetime->age = 0;
+
+    //fprintf(stdout, "gps_datetime %d:%d\n", datetime->hour, datetime->minute);
+    return ( common.gpzda.valueSet );
 }
 
 // get satellite info
-extern void gps_gpgsa(satellitedata_t *sat) {
+extern char gps_gpgsa(satellitedata_t *sat) {
     sat->Satellitestatus = common.gpgsa.Satellitestatus;
     sat->Autoselection = common.gpgsa.Autoselection;
     sat->Dfix = common.gpgsa.Dfix;
@@ -151,5 +205,6 @@ extern void gps_gpgsa(satellitedata_t *sat) {
     sat->PDOP = common.gpgsa.PDOP;
     sat->HDOP = common.gpgsa.HDOP;
     sat->VDOP = common.gpgsa.VDOP;
+    return ( common.gpgsa.valueSet );
 }
 
