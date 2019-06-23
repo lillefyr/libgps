@@ -66,9 +66,12 @@ extern void gps_data(void) {
         // extract the buffers we find
         switch (nmea_get_message_type(buffer)) {
             case NMEA_GPGGA:
-                //fprintf(stdout, "GPGGA\n"); fflush(stdout);
+                fprintf(stdout, "GPGGA\n");
+                fprintf(stdout, buffer);
+                fflush(stdout);
                 nmea_parse_gpgga(buffer, &common.gpgga);
                 gps_convert_deg_to_dec(&(common.gpgga.latitude), common.gpgga.lat, &(common.gpgga.longitude), common.gpgga.lon);
+                //fprintf(stdout, "GPGGA  latitude = %lf longitude = %lf\n", common.gpgga.latitude, common.gpgga.longitude); fflush(stdout);
                 //fprintf(stdout, "GPGGA\n"); fflush(stdout);
                 NMEA_Status |= NMEA_GPGGA; // set the bit
                 break;
@@ -146,6 +149,7 @@ double gps_deg_dec(double deg_point)
 {
     double ddeg;
     double sec = modf(deg_point, &ddeg)*60;
+
     int deg = (int)(ddeg/100);
     int min = (int)(deg_point-(deg*100));
 
@@ -160,8 +164,8 @@ double gps_deg_dec(double deg_point)
 extern char gps_location(loc_t *coord) {
     coord->latitude = common.gpgga.latitude;
     coord->lat = common.gpgga.lat;
-    coord->longitude = common.gpgga.lon;
-    coord->lon = common.gpgga.longitude;
+    coord->longitude = common.gpgga.longitude;
+    coord->lon = common.gpgga.lon;
     coord->altitude = common.gpgga.altitude;
     coord->speed = common.gprmc.speed;
     coord->course = common.gprmc.course;
